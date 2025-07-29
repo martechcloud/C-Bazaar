@@ -85,7 +85,7 @@ function renderProducts() {
 
     card.innerHTML = `
       <div class="relative h-32 rounded-md overflow-hidden shadow-sm">
-        <img src="images/${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" />
+        <img src="${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" />
         <div class="absolute bottom-0 left-0 right-0 px-2 py-1 bg-white/70 backdrop-blur-sm flex flex-col items-start">
           <span class="text-sm font-medium text-gray-900 truncate">${p.name}</span>
           <div class="flex items-center gap-2">
