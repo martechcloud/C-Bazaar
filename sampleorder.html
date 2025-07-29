@@ -160,7 +160,7 @@ function renderCart() {
     const div = document.createElement("div");
     div.className = "flex justify-between items-center bg-gray-100 p-2 rounded";
     div.innerHTML = `
-      <span>${item.name} - ${item.volume}</span>
+      <span>${item.name.split(" -")[0].trim()} - ${item.volume}</span>
       <button onclick="removeItem(${index})" class="text-red-600 font-bold">🗑️</button>
     `;
     cartItems.appendChild(div);
