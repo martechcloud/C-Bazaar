@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>C-Bazaar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+<!-- 🔔 Welcome Popup -->
+<div id="welcomePopup" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-60 flex items-center justify-center z-50">
+  <div class="bg-white text-center p-6 rounded-xl shadow-xl">
+    <h2 class="text-xl font-bold text-green-700">Welcome to C-Bazaar 👋</h2>
+  </div>
+</div>
+
+<!-- ✅ Navigation -->
+<header class="bg-green-700 text-white px-4 py-2 flex justify-between items-center shadow-md">
+  <img src="https://via.placeholder.com/100x40?text=C-Bazaar" alt="Logo" class="h-10" />
+  <button onclick="openCheckout()" class="flex items-center gap-2 bg-white text-green-700 px-3 py-1 rounded shadow">
+    🛒 <span class="font-semibold">Checkout</span>
+  </button>
+</header>
+
+<!-- ✅ Product List -->
+<div class="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="productList">
+  Loading...
+</div>
+
+<!-- ✅ Volume Selection Modal -->
+<div id="volumeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+  <div class="bg-white p-4 rounded-xl w-80">
+    <div class="flex justify-between mb-2">
+      <h3 id="modalProductName" class="font-bold text-lg"></h3>
+      <button onclick="closeModal()" class="text-red-500 font-bold">&times;</button>
+    </div>
+    <div id="volumeOptions" class="flex flex-wrap gap-2 mt-2"></div>
+  </div>
+</div>
+
+<!-- ✅ Checkout Modal -->
+<div id="checkoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+  <div class="bg-white p-4 rounded-xl w-80 max-h-[80vh] overflow-y-auto">
+    <div class="flex justify-between mb-2">
+      <h3 class="font-bold text-lg">Your Cart</h3>
+      <button onclick="closeCheckout()" class="text-red-500 font-bold">&times;</button>
+    </div>
+    <div id="cartItems" class="space-y-2"></div>
+    <button onclick="sendToWhatsApp()" class="mt-4 w-full bg-green-700 text-white py-2 rounded shadow">Send to WhatsApp</button>
+  </div>
+</div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwWr4O-qDm-MY2Mo-4mQF7CPlAJXZW1QWX86-apbap51QDbviDbllUpsQo39y9jZ6CeEA/exec"; // Replace with your actual Apps Script URL
+let products = [], cart = [], selectedProduct = null;
+
+window.onload = () => {
+  document.getElementById("welcomePopup").style.display = "flex";
+  setTimeout(() => {
+    document.getElementById("welcomePopup").style.display = "none";
+  }, 2000);
+  fetchProducts();
+};
+
+function fetchProducts() {
+  fetch(SHEET_URL)
+    .then(res => res.json())
+    .then(data => {
+      products = data;
+      renderProducts();
+    });
+}
+
+function renderProducts() {
+  const productList = document.getElementById("productList");
+  productList.innerHTML = '';
+  products.forEach((p, index) => {
+    const card = document.createElement("div");
+    card.className = "bg-white rounded-xl shadow hover:shadow-md transition p-3 cursor-pointer";
+    card.innerHTML = `
+      <img src="${p.image}" class="w-full h-28 object-cover rounded-md mb-2" />
+      <div class="text-sm font-semibold">${p.name}</div>
+      <div class="text-green-700 text-base font-bold mt-1">${p.price}</div>
+    `;
+    card.onclick = () => {
+      selectedProduct = p;
+      showVolumeModal(p);
+    };
+    productList.appendChild(card);
+  });
+}
+
+function showVolumeModal(product) {
+  document.getElementById("modalProductName").textContent = product.name;
+  const volumeOptions = document.getElementById("volumeOptions");
+  volumeOptions.innerHTML = '';
+  product.volumes.forEach(vol => {
+    const btn = document.createElement("button");
+    btn.className = "bg-green-600 text-white px-3 py-1 rounded";
+    btn.textContent = vol;
+    btn.onclick = () => addToCart(product, vol);
+    volumeOptions.appendChild(btn);
+  });
+  document.getElementById("volumeModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("volumeModal").style.display = "none";
+}
+
+function addToCart(product, volume) {
+  cart.push({ ...product, volume });
+  closeModal();
+}
+
+function openCheckout() {
+  renderCart();
+  document.getElementById("checkoutModal").style.display = "flex";
+}
+
+function closeCheckout() {
+  document.getElementById("checkoutModal").style.display = "none";
+}
+
+function renderCart() {
+  const cartItems = document.getElementById("cartItems");
+  cartItems.innerHTML = '';
+  cart.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "flex justify-between items-center bg-gray-100 p-2 rounded";
+    div.innerHTML = `
+      <span>${item.name} - ${item.volume}</span>
+      <button onclick="removeItem(${index})" class="text-red-600 font-bold">🗑️</button>
+    `;
+    cartItems.appendChild(div);
+  });
+}
+
+function removeItem(index) {
+  cart.splice(index, 1);
+  renderCart();
+}
+
+function sendToWhatsApp() {
+  const phone = "918983450203";
+  let message = "Order from C-Bazaar:\n";
+  cart.forEach(item => {
+    message += `${item.name} - ${item.volume}\n`;
+  });
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
