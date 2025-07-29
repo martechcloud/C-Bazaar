@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>C-Bazaar</title>
+  <title>Continental Bazaar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
@@ -12,7 +12,7 @@
 <!-- 🔔 Welcome Popup -->
 <div id="welcomePopup" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-60 flex items-center justify-center z-50">
   <div class="bg-white text-center p-6 rounded-xl shadow-xl">
-    <h2 class="text-xl font-bold text-green-700">C-Bazaar मध्ये आपले स्वागत आहे. 👋</h2>
+    <h2 class="text-xl font-bold text-green-700">Continental Bazaar मध्ये आपले स्वागत आहे. 👋</h2>
   </div>
 </div>
 
@@ -45,7 +45,7 @@
 <div id="checkoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
   <div class="bg-white p-4 rounded-xl w-80 max-h-[80vh] overflow-y-auto">
     <div class="flex justify-between mb-2">
-      <h3 class="font-bold text-lg">Your Cart</h3>
+      <h3 class="font-bold text-lg">तुमची ऑर्डर</h3>
       <button onclick="closeCheckout()" class="text-red-500 font-bold">&times;</button>
     </div>
     <div id="cartItems" class="space-y-2"></div>
@@ -85,15 +85,15 @@ function renderProducts() {
     const youSave = (fakePrice - p.price).toFixed(2);
 
     card.innerHTML = `
-      <div class="relative h-32 rounded-md overflow-hidden shadow-sm bg-white">
+      <div class="relative h-48 rounded-md overflow-hidden shadow-sm bg-white">
         
         <!-- Best Deal Tag -->
-        <div class="absolute top-1 left-1 bg-yellow-400 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+        <div class="absolute top-1 left-1 bg-yellow-400 text-white text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
           Best Deal
         </div>
 
         <!-- % OFF Badge -->
-        <div class="absolute top-1 right-1 bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+        <div class="absolute top-1 right-1 bg-green-100 text-green-700 text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
           -${discountPercent}% OFF
         </div>
 
@@ -101,17 +101,16 @@ function renderProducts() {
         <img src="${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" loading="lazy" />
 
         <!-- Info Overlay -->
-        <div class="absolute bottom-0 left-0 right-0 px-2 py-1 bg-white/70 backdrop-blur-sm flex flex-col items-start">
-          <span class="text-sm font-medium text-gray-900 truncate">${p.name}</span>
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-gray-500 line-through">₹${fakePrice}</span>
-            <span class="text-green-700 font-bold text-base">₹${p.price.toFixed(2)}</span>
+        <div class="absolute bottom-0 left-0 right-0 px-2 py-2 bg-white/70 backdrop-blur-sm flex flex-col items-start">
+          <span class="text-base font-semibold text-gray-900 truncate">${p.name}</span>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-sm text-gray-500 line-through">₹${fakePrice}</span>
+            <span class="text-green-700 font-bold text-lg">₹${p.price.toFixed(2)}</span>
           </div>
-          <span class="text-[10px] text-green-600 mt-0.5">You save ₹${youSave}</span>
+          <span class="text-xs text-green-600 mt-0.5">You save ₹${youSave}</span>
         </div>
       </div>
     `;
-
 
 
     card.onclick = () => {
