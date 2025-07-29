@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>C-Bazaar</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
 
@@ -16,8 +17,8 @@
 </div>
 
 <!-- ✅ Navigation -->
-<header class="bg-green-700 text-white px-4 py-2 flex justify-between items-center shadow-md">
-  <img src="https://via.placeholder.com/100x40?text=C-Bazaar" alt="Logo" class="h-10" />
+<header class="bg-white-700 text-white px-4 py-2 flex justify-between items-center shadow-md">
+  <img src="cropped_logo.png" alt="Logo" class="h-10" />
   <button onclick="openCheckout()" class="flex items-center gap-2 bg-white text-green-700 px-3 py-1 rounded shadow">
     🛒 <span class="font-semibold">Checkout</span>
   </button>
@@ -59,7 +60,7 @@ window.onload = () => {
   document.getElementById("welcomePopup").style.display = "flex";
   setTimeout(() => {
     document.getElementById("welcomePopup").style.display = "none";
-  }, 2000);
+  }, 4000);
   fetchProducts();
 };
 
@@ -77,11 +78,15 @@ function renderProducts() {
   productList.innerHTML = '';
   products.forEach((p, index) => {
     const card = document.createElement("div");
-    card.className = "bg-white rounded-xl shadow hover:shadow-md transition p-3 cursor-pointer";
+    card.className = "bg-green rounded-xl shadow hover:shadow-md transition p-3 cursor-pointer";
     card.innerHTML = `
-      <img src="${p.image}" class="w-full h-28 object-cover rounded-md mb-2" />
-      <div class="text-sm font-semibold">${p.name}</div>
-      <div class="text-green-700 text-base font-bold mt-1">${p.price}</div>
+      <div class="relative rounded-md overflow-hidden shadow-sm">
+        <img src="${p.image}" class="w-full h-25 object-cover" />
+        <div class="absolute bottom-0 left-0 right-0 px-2 py-1 bg-white/70 backdrop-blur-sm flex justify-between items-center">
+          <span class="text-sm font-medium text-gray-900 truncate">${p.name}</span>
+          <span class="text-green-700 font-semibold text-base">${p.price}</span>
+        </div>
+      </div>
     `;
     card.onclick = () => {
       selectedProduct = p;
@@ -97,7 +102,7 @@ function showVolumeModal(product) {
   volumeOptions.innerHTML = '';
   product.volumes.forEach(vol => {
     const btn = document.createElement("button");
-    btn.className = "bg-green-600 text-white px-3 py-1 rounded";
+    btn.className = "bg-yellow-600 text-white px-3 py-1 rounded";
     btn.textContent = vol;
     btn.onclick = () => addToCart(product, vol);
     volumeOptions.appendChild(btn);
@@ -112,7 +117,32 @@ function closeModal() {
 function addToCart(product, volume) {
   cart.push({ ...product, volume });
   closeModal();
+
+  const productName = product.name.split(" -")[0].trim();
+  let timerInterval;
+
+  Swal.fire({
+    title: `${productName} added to the cart!`,
+    timer: 1000,
+    timerProgressBar: true,
+    didOpen: () => {
+      Swal.showLoading();
+      const timer = Swal.getPopup().querySelector("b");
+      timerInterval = setInterval(() => {
+        timer.textContent = `${Swal.getTimerLeft()}`;
+      }, 100);
+    },
+    willClose: () => {
+      clearInterval(timerInterval);
+    }
+  }).then((result) => {
+    if (result.dismiss === Swal.DismissReason.timer) {
+      console.log(`${productName} alert closed by timer`);
+    }
+  });
 }
+
+
 
 function openCheckout() {
   renderCart();
@@ -138,11 +168,37 @@ function renderCart() {
 }
 
 function removeItem(index) {
-  cart.splice(index, 1);
+  const removedItem = cart.splice(index, 1)[0];
   renderCart();
+
+  const productName = removedItem.name.split(" -")[0].trim();
+  Swal.fire({
+    icon: 'warning',
+    title: `${productName} removed from cart`,
+    timer: 1500,
+    showConfirmButton: false,
+    timerProgressBar: true,
+    toast: true,
+    position: 'top-end'
+  });
 }
 
+
 function sendToWhatsApp() {
+  if (cart.length === 0) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Your cart is empty!',
+      text: 'Please add some items before sending the order.',
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      toast: true,
+      position: 'top-end'
+    });
+    return;
+  }
+
   const phone = "918983450203";
   let message = "Order from C-Bazaar:\n";
   cart.forEach(item => {
@@ -151,7 +207,9 @@ function sendToWhatsApp() {
   const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
   window.open(url, "_blank");
 }
+
 </script>
+
 
 </body>
 </html>
