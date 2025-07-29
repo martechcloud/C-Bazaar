@@ -19,8 +19,9 @@
 <!-- ✅ Navigation -->
 <header class="bg-white-700 text-white px-4 py-2 flex justify-between items-center shadow-md">
   <img src="cropped_logo.png" alt="Logo" class="h-10" />
-  <button onclick="openCheckout()" class="flex items-center gap-2 bg-white text-green-700 px-3 py-1 rounded shadow">
+  <button onclick="openCheckout()" class="relative flex items-center gap-2 bg-white text-green-700 px-3 py-1 rounded shadow">
     🛒 <span class="font-semibold">Checkout</span>
+    <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"></span>
   </button>
 </header>
 
@@ -114,6 +115,16 @@ function closeModal() {
   document.getElementById("volumeModal").style.display = "none";
 }
 
+function updateCartCount() {
+  const countSpan = document.getElementById("cartCount");
+  if (cart.length > 0) {
+    countSpan.textContent = cart.length;
+    countSpan.classList.remove("hidden");
+  } else {
+    countSpan.classList.add("hidden");
+  }
+}
+
 function addToCart(product, volume) {
   cart.push({ ...product, volume });
   closeModal();
@@ -140,6 +151,7 @@ function addToCart(product, volume) {
       console.log(`${productName} alert closed by timer`);
     }
   });
+  updateCartCount();
 }
 
 
@@ -181,6 +193,7 @@ function removeItem(index) {
     toast: true,
     position: 'top-end'
   });
+  updateCartCount();
 }
 
 
