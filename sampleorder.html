@@ -80,21 +80,40 @@ function renderProducts() {
   products.forEach((p, index) => {
     const card = document.createElement("div");
     card.className = "bg-green rounded-xl shadow hover:shadow-md transition p-3 cursor-pointer";
-    const extra = (Math.random() * 2.99 + 1).toFixed(2); // ₹1.00 to ₹3.99
-    const fakePrice = (p.price + parseFloat(extra)).toFixed(2);
+    const fakePrice = (p.othersprice);
+    const discountPercent = Math.round(((fakePrice - p.price) / fakePrice) * 100);
+    const youSave = (fakePrice - p.price).toFixed(2);
 
     card.innerHTML = `
-      <div class="relative h-32 rounded-md overflow-hidden shadow-sm">
-        <img src="${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" />
+      <div class="relative h-32 rounded-md overflow-hidden shadow-sm bg-white">
+        
+        <!-- Best Deal Tag -->
+        <div class="absolute top-1 left-1 bg-yellow-400 text-white text-[10px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          Best Deal
+        </div>
+
+        <!-- % OFF Badge -->
+        <div class="absolute top-1 right-1 bg-green-100 text-green-700 text-[10px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          -${discountPercent}% OFF
+        </div>
+
+        <!-- Product Image -->
+        <img src="${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" loading="lazy" />
+
+        <!-- Info Overlay -->
         <div class="absolute bottom-0 left-0 right-0 px-2 py-1 bg-white/70 backdrop-blur-sm flex flex-col items-start">
           <span class="text-sm font-medium text-gray-900 truncate">${p.name}</span>
           <div class="flex items-center gap-2">
             <span class="text-xs text-gray-500 line-through">₹${fakePrice}</span>
-            <span class="text-green-700 font-bold text-base">₹${p.price}</span>
+            <span class="text-green-700 font-bold text-base">₹${p.price.toFixed(2)}</span>
           </div>
+          <span class="text-[10px] text-green-600 mt-0.5">You save ₹${youSave}</span>
         </div>
       </div>
     `;
+
+
+
     card.onclick = () => {
       selectedProduct = p;
       showVolumeModal(p);
