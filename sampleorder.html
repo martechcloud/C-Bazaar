@@ -80,17 +80,32 @@ function renderProducts() {
   products.forEach((p, index) => {
     const card = document.createElement("div");
     card.className = "bg-green rounded-xl shadow hover:shadow-md transition p-3 cursor-pointer";
-    const fakePrice = (p.othersprice);
+
+    const fakePrice = p.othersprice;
     const discountPercent = Math.round(((fakePrice - p.price) / fakePrice) * 100);
     const youSave = (fakePrice - p.price).toFixed(2);
+
+    // Badge and Save Label Logic
+    let badgeHTML = '';
+    let saveTextHTML = '';
+
+    if (discountPercent > 2) {
+      badgeHTML = `
+        <div class="absolute top-1 right-1 bg-green-100 text-green-700 text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          -${discountPercent}% OFF
+        </div>`;
+      saveTextHTML = `<span class="text-xs text-green-600 mt-0.5">You save ₹${youSave}</span>`;
+    } else {
+      badgeHTML = `
+        <div class="absolute top-1 left-1 bg-yellow-400 text-white text-[11px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          Best Price
+        </div>`;
+    }
 
     card.innerHTML = `
       <div class="relative h-48 rounded-md overflow-hidden shadow-sm bg-white">
 
-        <!-- % OFF Badge -->
-        <div class="absolute top-1 right-1 bg-green-100 text-green-700 text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
-          -${discountPercent}% OFF
-        </div>
+        ${badgeHTML}
 
         <!-- Product Image -->
         <img src="${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" loading="lazy" />
@@ -102,10 +117,11 @@ function renderProducts() {
             <span class="text-sm text-gray-500 line-through">₹${fakePrice}</span>
             <span class="text-green-700 font-bold text-lg">₹${p.price.toFixed(2)}</span>
           </div>
-          <span class="text-xs text-green-600 mt-0.5">You save ₹${youSave}</span>
+          ${saveTextHTML}
         </div>
       </div>
     `;
+
 
 
     card.onclick = () => {
