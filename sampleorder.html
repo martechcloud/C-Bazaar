@@ -79,17 +79,26 @@ function renderProducts() {
   productList.innerHTML = '';
   products.forEach((p, index) => {
     const card = document.createElement("div");
-    card.className = "bg-green rounded-xl shadow hover:shadow-md transition p-3 cursor-pointer";
+    // Determine if product is out of stock
+    const isOutOfStock = p.status && p.status.toLowerCase() === "out of stock";
+
+    // Apply styles based on stock status
+    card.className = `bg-green rounded-xl shadow hover:shadow-md transition p-3 ${isOutOfStock ? 'opacity-60 pointer-events-none' : 'cursor-pointer'}`;
 
     const fakePrice = p.othersprice;
     const discountPercent = Math.round(((fakePrice - p.price) / fakePrice) * 100);
     const youSave = (fakePrice - p.price).toFixed(2);
 
-    // Badge and Save Label Logic
+    // Badge Logic
     let badgeHTML = '';
     let saveTextHTML = '';
 
-    if (discountPercent > 2) {
+    if (isOutOfStock) {
+      badgeHTML = `
+        <div class="absolute top-1 left-1 bg-red-500 text-white text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          Out of Stock
+        </div>`;
+    } else if (discountPercent > 2) {
       badgeHTML = `
         <div class="absolute top-1 right-1 bg-green-100 text-green-700 text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
           -${discountPercent}% OFF
@@ -121,6 +130,8 @@ function renderProducts() {
         </div>
       </div>
     `;
+
+
 
 
 
