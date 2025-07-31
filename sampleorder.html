@@ -240,6 +240,14 @@ function removeItem(index) {
   const removedItem = cart.splice(index, 1)[0];
   renderCart();
 
+  // ✅ Remove green highlight from the product card
+  const cardId = removedItem.cardId || `card-${removedItem.id}`;
+  const cardEl = document.getElementById(cardId);
+  if (cardEl) {
+    cardEl.classList.remove('border-2', 'border-green-600', 'bg-green-100');
+  }
+
+  // ✅ Optional: Success alert
   const productName = removedItem.name.split(" -")[0].trim();
   Swal.fire({
     icon: 'warning',
@@ -250,8 +258,10 @@ function removeItem(index) {
     toast: true,
     position: 'top-end'
   });
+
   updateCartCount();
 }
+
 
 
 function sendToWhatsApp() {
