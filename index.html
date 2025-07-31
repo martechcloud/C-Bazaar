@@ -1,40 +1,295 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Price Reveal - C-Bazaar</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-    .container {
-      background-color: #ffffff;
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      font-size: 2.5rem;
-      color: #222222;
-      margin: 0;
-    }
-    .highlight {
-      color: #e53935;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Continental Bazaar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>Revealing Our <span class="highlight">Prices</span> on <span class="highlight">31st August</span></h1>
+<body class="bg-gray-100 text-gray-800">
+
+<!-- 🔔 Welcome Popup -->
+<div id="welcomePopup" class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-60 flex items-center justify-center z-50">
+  <div class="bg-white text-center p-6 rounded-xl shadow-xl">
+    <h2 class="text-xl font-bold text-green-700">Continental Bazaar मध्ये आपले स्वागत आहे. 👋</h2>
   </div>
+</div>
+
+<!-- ✅ Navigation -->
+<header class="fixed top-0 left-0 right-0 bg-white text-black px-4 py-2 flex justify-between items-center shadow-md z-50">
+  <img src="cropped_logo.png" alt="Logo" class="h-10" />
+  <button onclick="openCheckout()" class="relative flex items-center gap-2 bg-white text-green-700 px-3 py-1 rounded shadow">
+    🛒 <span class="font-semibold">पूर्ण करा</span>
+    <span id="cartCount" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full hidden"></span>
+  </button>
+</header>
+
+<!-- ✅ Product List -->
+<div class="mt-12 p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="productList">
+  Loading...
+</div>
+
+<!-- ✅ Volume Selection Modal -->
+<div id="volumeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+  <div class="bg-white p-4 rounded-xl w-80">
+    <div class="flex justify-between mb-2">
+      <h3 id="modalProductName" class="font-bold text-lg"></h3>
+      <button onclick="closeModal()" class="text-red-500 font-bold">&times;</button>
+    </div>
+    <div id="volumeOptions" class="flex flex-wrap gap-2 mt-2"></div>
+  </div>
+</div>
+
+<!-- ✅ Checkout Modal -->
+<div id="checkoutModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+  <div class="bg-white p-4 rounded-xl w-80 max-h-[80vh] overflow-y-auto">
+    <div class="flex justify-between mb-2">
+      <h3 class="font-bold text-lg">तुमची ऑर्डर</h3>
+      <button onclick="closeCheckout()" class="text-red-500 font-bold">&times;</button>
+    </div>
+    <div id="cartItems" class="space-y-2"></div>
+    <button onclick="sendToWhatsApp()" class="mt-4 w-full bg-green-700 text-white py-2 rounded shadow">WhatsApp वर पाठवा</button>
+  </div>
+</div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbwWr4O-qDm-MY2Mo-4mQF7CPlAJXZW1QWX86-apbap51QDbviDbllUpsQo39y9jZ6CeEA/exec"; // Replace with your actual Apps Script URL
+let products = [], cart = [], selectedProduct = null;
+
+window.onload = () => {
+  document.getElementById("welcomePopup").style.display = "flex";
+  setTimeout(() => {
+    document.getElementById("welcomePopup").style.display = "none";
+  }, 4000);
+  fetchProducts();
+};
+
+function fetchProducts() {
+  fetch(SHEET_URL)
+    .then(res => res.json())
+    .then(data => {
+      products = data;
+      renderProducts();
+    });
+}
+
+function renderProducts() {
+  const productList = document.getElementById("productList");
+  productList.innerHTML = '';
+  products.forEach((p, index) => {
+    const card = document.createElement("div");
+    card.id = `card-${index}`;
+    p.cardId = `card-${index}`;  // Save for later use in cart highlight
+
+    // Determine if product is out of stock
+    const isOutOfStock = p.status && p.status.toLowerCase() === "out of stock";
+
+    // Apply styles based on stock status
+    card.className = `bg-green rounded-xl shadow hover:shadow-md transition p-3 ${isOutOfStock ? 'opacity-60 pointer-events-none' : 'cursor-pointer'}`;
+
+    const fakePrice = p.othersprice;
+    const discountPercent = Math.round(((fakePrice - p.price) / fakePrice) * 100);
+    const youSave = (fakePrice - p.price).toFixed(2);
+
+    // Badge Logic
+    let badgeHTML = '';
+    let saveTextHTML = '';
+
+    if (isOutOfStock) {
+      badgeHTML = `
+        <div class="absolute top-1 left-1 bg-red-500 text-white text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          Out of Stock
+        </div>`;
+    } else if (discountPercent > 2) {
+      badgeHTML = `
+        <div class="absolute top-1 right-1 bg-green-100 text-green-700 text-[12px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          -${discountPercent}% OFF
+        </div>`;
+      saveTextHTML = `<span class="text-xs text-green-600 mt-0.5">You save ₹${youSave}</span>`;
+    } else {
+      badgeHTML = `
+        <div class="absolute top-1 left-1 bg-yellow-400 text-white text-[11px] px-2 py-0.5 rounded-full shadow-sm font-semibold z-10">
+          Best Price
+        </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="relative h-48 rounded-md overflow-hidden shadow-sm bg-white">
+
+        ${badgeHTML}
+
+        <!-- Product Image -->
+        <img src="${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" loading="lazy" />
+
+        <!-- Info Overlay -->
+        <div class="absolute bottom-0 left-0 right-0 px-2 py-2 bg-white/70 backdrop-blur-sm flex flex-col items-start">
+          <span class="text-base font-semibold text-gray-900 truncate">${p.name}</span>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-sm text-gray-500 line-through">₹${fakePrice}</span>
+            <span class="text-green-700 font-bold text-lg">₹${p.price.toFixed(2)}</span>
+          </div>
+          ${saveTextHTML}
+        </div>
+      </div>
+    `;
+
+
+
+
+
+    card.onclick = () => {
+      selectedProduct = p;
+      showVolumeModal(p);
+    };
+    productList.appendChild(card);
+  });
+}
+
+function showVolumeModal(product) {
+  document.getElementById("modalProductName").textContent = product.name;
+  const volumeOptions = document.getElementById("volumeOptions");
+  volumeOptions.innerHTML = '';
+  product.volumes.forEach(vol => {
+    const btn = document.createElement("button");
+    btn.className = "bg-yellow-600 text-white px-3 py-1 rounded";
+    btn.textContent = vol;
+    btn.onclick = () => addToCart(product, vol);
+    volumeOptions.appendChild(btn);
+  });
+  document.getElementById("volumeModal").style.display = "flex";
+}
+
+function closeModal() {
+  document.getElementById("volumeModal").style.display = "none";
+}
+
+function updateCartCount() {
+  const countSpan = document.getElementById("cartCount");
+  if (cart.length > 0) {
+    countSpan.textContent = cart.length;
+    countSpan.classList.remove("hidden");
+  } else {
+    countSpan.classList.add("hidden");
+  }
+}
+
+function addToCart(product, volume) {
+  cart.push({ ...product, volume });
+
+  closeModal();
+
+  // ✅ Get the card ID saved during render
+  const cardId = product.cardId || `card-${product.id}`;
+  const cardEl = document.getElementById(cardId);
+
+  if (cardEl) {
+    cardEl.classList.add('border-2', 'border-green-600', 'bg-green-100');
+  }
+
+  const productName = product.name.split(" -")[0].trim();
+  let timerInterval;
+
+  Swal.fire({
+    title: `${productName} कार्टमध्ये जोडले!`,
+    timer: 1000,
+    timerProgressBar: true,
+    didOpen: () => {
+      Swal.showLoading();
+      const timer = Swal.getPopup().querySelector("b");
+      timerInterval = setInterval(() => {
+        timer.textContent = `${Swal.getTimerLeft()}`;
+      }, 100);
+    },
+    willClose: () => {
+      clearInterval(timerInterval);
+    }
+  });
+
+  updateCartCount();
+}
+
+
+
+
+
+function openCheckout() {
+  renderCart();
+  document.getElementById("checkoutModal").style.display = "flex";
+}
+
+function closeCheckout() {
+  document.getElementById("checkoutModal").style.display = "none";
+}
+
+function renderCart() {
+  const cartItems = document.getElementById("cartItems");
+  cartItems.innerHTML = '';
+  cart.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "flex justify-between items-center bg-gray-100 p-2 rounded";
+    div.innerHTML = `
+      <span>${item.name.split(" -")[0].trim()} - ${item.volume}</span>
+      <button onclick="removeItem(${index})" class="text-red-600 font-bold">🗑️</button>
+    `;
+    cartItems.appendChild(div);
+  });
+}
+
+function removeItem(index) {
+  const removedItem = cart.splice(index, 1)[0];
+  renderCart();
+
+  // ✅ Remove green highlight from the product card
+  const cardId = removedItem.cardId || `card-${removedItem.id}`;
+  const cardEl = document.getElementById(cardId);
+  if (cardEl) {
+    cardEl.classList.remove('border-2', 'border-green-600', 'bg-green-100');
+  }
+
+  // ✅ Optional: Success alert
+  const productName = removedItem.name.split(" -")[0].trim();
+  Swal.fire({
+    icon: 'warning',
+    title: `${productName} कार्टमधून काढले`,
+    timer: 1500,
+    showConfirmButton: false,
+    timerProgressBar: true,
+    toast: true,
+    position: 'top-end'
+  });
+
+  updateCartCount();
+}
+
+
+
+function sendToWhatsApp() {
+  if (cart.length === 0) {
+    Swal.fire({
+      icon: 'info',
+      title: 'तुमची कार्ट रिकामी आहे!',
+      text: 'ऑर्डर पाठवण्यापूर्वी कृपया काही वस्तू जोडा.',
+      timer: 2000,
+      showConfirmButton: false,
+      timerProgressBar: true,
+      toast: true,
+      position: 'top-end'
+    });
+    return;
+  }
+
+  const phone = "917499491712";
+  let message = "आजची ऑर्डर:\n";
+  cart.forEach(item => {
+    message += `${item.name.split(" -")[0].trim()} - ${item.volume}\n`;
+  });
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+  window.open(url, "_blank");
+}
+
+</script>
+
+
 </body>
 </html>
