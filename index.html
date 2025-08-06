@@ -116,15 +116,17 @@ function renderProducts() {
 
     card.innerHTML = `
       <div class="relative h-48 rounded-md overflow-hidden shadow-sm bg-white">
-
+    
         ${badgeHTML}
-
+    
         <!-- Product Image -->
         <img src="${p.image}" class="absolute top-0 left-0 w-full h-full object-cover" loading="lazy" />
-
+    
         <!-- Info Overlay -->
         <div class="absolute bottom-0 left-0 right-0 px-2 py-2 bg-white/70 backdrop-blur-sm flex flex-col items-start">
-          <span class="text-base font-semibold text-gray-900 truncate">${p.name}</span>
+          <span class="text-sm sm:text-base font-semibold text-gray-900 leading-tight break-words max-w-full">
+            ${p.name}
+          </span>
           <div class="flex items-center gap-2 mt-0.5">
             <span class="text-sm text-gray-500 line-through">₹${fakePrice}</span>
             <span class="text-green-700 font-bold text-lg">₹${p.price.toFixed(2)}</span>
@@ -133,6 +135,7 @@ function renderProducts() {
         </div>
       </div>
     `;
+
 
 
 
