@@ -293,6 +293,48 @@ function sendToWhatsApp() {
 
 </script>
 
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwWr4O-qDm-MY2Mo-4mQF7CPlAJXZW1QWX86-apbap51QDbviDbllUpsQo39y9jZ6CeEA/exec";
+
+    // Function to generate a random UUID
+    function generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+    // Function to store UUID in Google Sheet via GAS
+    function sendToGoogleSheet(uuid) {
+        fetch(GAS_URL + "?function=storeUUID&uuid=" + encodeURIComponent(uuid))
+            .then(response => response.text())
+            .then(data => {
+                console.log("Google Sheet Response:", data);
+            })
+            .catch(error => {
+                console.error("Error sending UUID:", error);
+            });
+    }
+
+    // Check LocalStorage for UUID
+    let uuid = localStorage.getItem("user_uuid");
+
+    if (!uuid) {
+        // No UUID found → Generate and store it
+        uuid = generateUUID();
+        localStorage.setItem("user_uuid", uuid);
+        console.log("Generated and stored UUID:", uuid);
+    } else {
+        console.log("UUID found in LocalStorage:", uuid);
+    }
+
+    // Send UUID to Google Sheet
+    sendToGoogleSheet(uuid);
+
+</script>
+
+
 
 </body>
 </html>
