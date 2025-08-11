@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User UUID Redirect</title>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get the current URL path (e.g., /1234abcd-5678-efgh)
+            let pathParts = window.location.pathname.split("/").filter(Boolean);
+
+            if (pathParts.length > 0) {
+                let userUUID = pathParts[pathParts.length - 1]; // Last part of the path
+                console.log("Extracted UUID:", userUUID);
+
+                // Save to localStorage
+                localStorage.setItem("user_uuid", userUUID);
+
+                // Redirect to base URL
+                window.location.href = "/";
+            } else {
+                console.warn("No UUID found in URL");
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Processing...</h1>
+</body>
+</html>
