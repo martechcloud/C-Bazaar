@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User UUID Redirect</title>
+    <title>UUID Redirect</title>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Get the current URL path (e.g., /1234abcd-5678-efgh)
-            let pathParts = window.location.pathname.split("/").filter(Boolean);
+            // Get URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const userUUID = params.get("uid");
 
-            if (pathParts.length > 0) {
-                let userUUID = pathParts[pathParts.length - 1]; // Last part of the path
+            if (userUUID) {
                 console.log("Extracted UUID:", userUUID);
-
-                // Save to localStorage
                 localStorage.setItem("user_uuid", userUUID);
-
-                // Redirect to base URL
-                window.location.href = "/";
+                // Redirect to the base C-Bazaar folder
+                window.location.href = "https://martechcloud.github.io/C-Bazaar/";
             } else {
-                console.warn("No UUID found in URL");
+                console.warn("No UID found in URL");
             }
         });
     </script>
@@ -28,3 +25,4 @@
     <h1>Processing...</h1>
 </body>
 </html>
+
