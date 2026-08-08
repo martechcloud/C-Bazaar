@@ -214,7 +214,7 @@
               onclick="ordernow()"
               class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-semibold transition"
             >
-              ऑर्डर बुक करा!
+              ऑफर बुक करा!
             </button>
           </div>
         </div>
@@ -705,6 +705,18 @@
         const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
       }
+    </script>
+
+    <script>
+      const customerPhone = document.getElementById("customerPhone");
+      const continueBtn = document.getElementById("continueBtn");
+
+      customerPhone.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          continueBtn.click();
+        }
+      });
     </script>
   </body>
 </html>
